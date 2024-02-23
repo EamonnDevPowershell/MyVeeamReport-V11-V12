@@ -59,8 +59,8 @@ $ReportHasDataEmail = $true
 	Only report a SB failed VM if that same VM never passed in the time frame.
 	If your only interested in SB VM's that fail consistently over the time frame. 
 	Example. Your SB jobs test VM's every week. Your time span is one month. If a VM fails every week then send email. If you have a ticketing system then this could log a ticket for you. 
-	If a VM passes even once durning the time span then don't send email. 
-	Use with all other setting set to $false execpt "$showTaskWFSb = $true" and "$ReportSBFailingOnly = $true".
+	If a VM passes even once during the time span then don't send email. 
+	Use with all other setting set to $false except "$showTaskWFSb = $true" and "$ReportSBFailingOnly = $true".
 
 #>
 #The default is "$ReportSBFailingOnly = $false" to ignore this setting.

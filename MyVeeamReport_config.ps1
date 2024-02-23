@@ -14,7 +14,7 @@
 #>
 <#
 	.UPDATES
-	Eamonn Deering
+   Eamonn Deering
 	Last Updated: 10 Sep 2023
 	Config Version: 12.0.0.3
 	The following two settings requires MyVeeamReport Version: 12.0.0.5 or above.
@@ -28,6 +28,17 @@
 	
 	.SUGGESTIONS
 	I find setting $setCSVDelimiter to  "," works well for Excel
+	
+   Eamonn Deering
+	Last Updated: 23 Feb 2024
+	Config Version: 12.0.0.4
+	Added
+	$showDetailedEp 	
+	$showAllTasksEp 	
+	$showRunningTasksEp 
+	$showTaskWFEp 		
+	$showTaskSuccessEp 	
+	$exportAllTasksEpToCSV 
 	
 	#> 
 
@@ -59,8 +70,8 @@ $ReportHasDataEmail = $false
 	Only report a SB failed VM if that same VM never passed in the time frame.
 	If your only interested in SB VM's that fail consistently over the time frame. 
 	Example. Your SB jobs test VM's every week. Your time span is one month. If a VM fails every week then send email. If you have a ticketing system then this could log a ticket for you. 
-	If a VM passes even once durning the time span then don't send email. 
-	Use with all other setting set to $false execpt "$showTaskWFSb = $true" and "$ReportSBFailingOnly = $true".
+	If a VM passes even once during the time span then don't send email. 
+	Use with all other setting set to $false except "$showTaskWFSb = $true" and "$ReportSBFailingOnly = $true".
 
 #>
 #The default is "$ReportSBFailingOnly = $false" to ignore this setting.
@@ -105,6 +116,7 @@ $saveCSV = $true
 $baseFilenameCSV 	= ".\Reports\MyVeeamReport_$(Get-Date -format yyyyMMdd_HHmmss)"
 # Export All Tasks to CSV file
 $exportAllTasksBkToCSV = $true
+$exportAllTasksEpToCSV = $true
 #Delimiter for CSV files
 $setCSVDelimiter = ";"
 
@@ -337,6 +349,19 @@ $onlyLastEp = $false
 # Only report on the following Agent Backup Job(s)
 #$epbJob = @("Agent Backup Job 1","Agent Backup Job 3","Agent Backup Job *")
 $epbJob = @("")
+
+#Added ED 23/02/2024
+# Show detailed information for Agent Backup Jobs/Sessions (Avg Speed, Total(GB), Processed(GB), Read(GB), Transferred(GB), Dedupe, Compression)
+$showDetailedEp 	= $true
+# Show all Agent Backup Tasks from Sessions within time frame ($reportMode)
+$showAllTasksEp 	= $true
+# Show Running Backup Tasks
+$showRunningTasksEp = $true
+# Show Agent Backup Tasks w/Warnings or Failures from Sessions within time frame ($reportMode)
+$showTaskWFEp 		= $true
+# Show Successful Agent Backup Tasks from Sessions within time frame ($reportMode)
+$showTaskSuccessEp 	= $true
+
 
 # Show Configuration Backup Summary
 $showSummaryConfig = $true
