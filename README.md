@@ -16,7 +16,7 @@ https://gist.github.com/smasterson/9136468
 This repo is a copy of Marco Horstmann Version: 12.0.0.4
 
 I've done a slew of enhancements, bug fixes, improved on the V11 - V12 compatibility, brough back SureBackup and extended the Agent reporting since V12.0.0.4 . 
-This repo current version is V12.0.0.12 
+This repo current version is V12.0.0.13 
 
 ## Contribution
 First of all I want to thank Shawn Masterson, who created this script but abandoned it in 2018. I always used this script to figure out stuff in Veeam PowerShell when started to work with it.

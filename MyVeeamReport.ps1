@@ -15,7 +15,7 @@
     emailed to you.
 
     .EXAMPLE
-	With no parameters the settings will be pulled in from the default "MyVeeamReport_config.ps1"
+	With no paramaters the settings will be pulled in from the default "MyVeeamReport_config.ps1"
    
    .\MyVeeamReport.ps1
 	
@@ -35,7 +35,6 @@
     Run script from an elevated PowerShell console
 
     .NOTES
-	https://github.com/marcohorstmann/MyVeeamReport
     New Authors: Marco Horstmann, Bernhard Roth & Herbert Szumovski
     Last Updated: 19 June 2023
     Version: 12.0.0.4
@@ -53,7 +52,6 @@
 
 <#
 	.UPDATES
-	https://github.com/EamonnDevPowershell/MyVeeamReport-V11-V12
 	Eamonn Deering 
 	Last Updated: Aug 2023
 	Version: 12.0.0.5
@@ -97,7 +95,7 @@ Areas updated:
 	Adding example config files 
 	Compared result with 9.5.3, 12.0.0.4 and 12.0.0.9. No issues noted.
 	Changed $subHead01  to $subHead01suc (Green). 
-	With Proxies and repos offline timeouts where over 6sec fore each. The script session screen shows all the red warnings. Speeded up detections of offline Proixes and repo's and masked most of the red warnings.
+	With Proxies and repos offline timeouts where over 6sec fore each. The script session screen showes all the red warnings. Speeded up detections of offline Proixes and repo's and masked most of the red warnings.
 	
 	Eamonn Deering 
 	Last Updated: 12 Sep 2023
@@ -114,6 +112,12 @@ Areas updated:
 	$showTaskWFEp 		
 	$showTaskSuccessEp 
 	$showDetailedEp	
+	
+	Eamonn Deering 
+	Last Updated: 24 Feb 2024
+	Version: 12.0.0.12
+	Added V11 Agent Task sessions to cover EpAgentManagement
+	
 
 #>
 
@@ -606,13 +610,36 @@ If ($allJobsTp) {
 # Get all Agent Backup Sessions
 $allSessEp = @()
 $allSessEpX = @()
+$jobType=@{}
 # ED. Minor bug in V11. Get-VBRComputerBackupJobSession can double up on .JobID. Session count in "Agent Backup Results Summary" can be over twice the total but "Agent Backup Sessions" reports correctly. 
 # The following fix works in V11 and V12. Verified on three systems. One showed 540 before and 211 after . 211 was correct. 
 If ($allJobsEp) {
-  $allSessEpX = Get-VBRComputerBackupJobSession 
+	# ED 24/02/2024 Adding V11 Agent Task sessions
+	If ($objectVersion.VeeamVersion -lt 12.0) {
+ 
+   $jobType[0] = [Veeam.Backup.Model.EDbJobType]::EpAgentManagement
+   $jobType[1] = [Veeam.Backup.Model.EDbJobType]::EndpointBackup
+   $jobType[2] = [Veeam.Backup.Model.EDbJobType]::EpAgentPolicy
+   $jobType[3] = [Veeam.Backup.Model.EDbJobType]::EpAgentBackup
+   
+   $x = -1
+   Foreach ($jobT in $jobType){
+	   $x=$x+1
+   $allSessEpXx += [Veeam.Backup.Core.CBackupSession]::GetByJobType($jobType[$x])
+   }
+   
+   ForEach ($Job in $allJobsEp){$allSessEp+= $allSessEpXx | Where-Object {$_.Name -match $job.Name}}
+      
+}else{
+	$allSessEpX = Get-VBRComputerBackupJobSession 
+     
   ForEach ($Job in $allJobsEp){$allSessEp+= $allSessEpX | Where-Object {$_.JobId -eq $job.Id}}
+  }
 }
-#$allSessEp.Count
+
+$allSessEp.Count
+
+
 # Get all SureBackup Sessions
 $allSessSb = @()
 If ($allJobsSb) {
@@ -642,6 +669,9 @@ $backupsBc = @($jobBackups | Where-Object {$_.JobType -eq "BackupSync"})
 $backupsEp 		= @($jobBackups | Where-Object {$_.JobType -eq "EndpointBackup" -or $_.JobType -eq "EpAgentManagement" })
 $backupsEpOther = @($jobBackups | Where-Object {$_.JobType -eq "EpAgentPolicy" -or $_.JobType -eq "EpAgentBackup"})
 $backupsEpAll = $backupsEp + $backupsEpOther
+$backupsEpAll.count
+#$backupsEpAll = Get-VBRComputerBackupJob
+#$backupsEpAll.count
 
 # Get all Media Pools
 $mediaPools = Get-VBRTapeMediaPool
@@ -4135,7 +4165,14 @@ If ($showSuccessEp) {
 ## Gathering tasks after session info has been recorded due to Veeam issue
 # Gather all Agent Backup Tasks from Sessions within time frame
 $taskListEp = @()
-$taskListEp += $sessListEp | Get-VBRTaskSession
+#$taskListEp += $sessListEp | Get-VBRTaskSession
+# https://forums.veeam.com/powershell-f26/get-vbrcomputerbackupjob-per-agent-status-t77632.html
+
+foreach ($session in $sessListEp) {
+ $taskListEp += Get-VBRTaskSession -Session $session 
+}
+$taskListEp.count
+
 $successTasksEp = @($taskListEp | Where-Object {$_.Status -eq "Success"})
 $wfTasksEp = @($taskListEp | Where-Object {$_.Status -match "Warning|Failed"})
 $runningTasksEp = @()
